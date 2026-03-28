@@ -1,3 +1,4 @@
+
 //your JS code here.
 
 // Load saved progress from sessionStorage or initialize empty array
@@ -27,7 +28,7 @@ const questions = [
   },
   {
     question: "Which is the largest planet in our solar system?",
-    choices: ["Earth", "Jupiter", "Mars", "Saturn"], // fixed to 4 options
+    choices: ["Earth", "Jupiter", "Mars", "Saturn"], // ensure 4 options
     answer: "Jupiter",
   },
   {
@@ -37,47 +38,45 @@ const questions = [
   },
 ];
 
-// Display the quiz questions and choices
+// Render questions
 function renderQuestions() {
-  questionsElement.innerHTML = ""; // clear before render
+  questionsElement.innerHTML = "";
 
   for (let i = 0; i < questions.length; i++) {
     const question = questions[i];
-    const questionElement = document.createElement("div");
+    const questionDiv = document.createElement("div");
 
-    const questionText = document.createElement("p");
-    questionText.innerText = question.question;
-    questionElement.appendChild(questionText);
+    // Question text
+    const questionText = document.createTextNode(question.question);
+    questionDiv.appendChild(questionText);
 
+    // Choices
     for (let j = 0; j < question.choices.length; j++) {
       const choice = question.choices[j];
 
-      const label = document.createElement("label");
+      const input = document.createElement("input");
+      input.type = "radio";
+      input.name = `question-${i}`;
+      input.value = choice;
 
-      const choiceElement = document.createElement("input");
-      choiceElement.setAttribute("type", "radio");
-      choiceElement.setAttribute("name", `question-${i}`);
-      choiceElement.setAttribute("value", choice);
-
-      // Restore saved answer
+      // Restore checked state (IMPORTANT for Cypress)
       if (userAnswers[i] === choice) {
-        choiceElement.checked = true;
+        input.setAttribute("checked", "true");
       }
 
-      // Save to sessionStorage on change
-      choiceElement.addEventListener("change", function () {
+      // Save progress on selection
+      input.addEventListener("change", function () {
         userAnswers[i] = choice;
         sessionStorage.setItem("progress", JSON.stringify(userAnswers));
       });
 
-      label.appendChild(choiceElement);
-      label.appendChild(document.createTextNode(choice));
+      const text = document.createTextNode(choice);
 
-      questionElement.appendChild(label);
-      questionElement.appendChild(document.createElement("br"));
+      questionDiv.appendChild(input);
+      questionDiv.appendChild(text);
     }
 
-    questionsElement.appendChild(questionElement);
+    questionsElement.appendChild(questionDiv);
   }
 }
 
@@ -94,7 +93,7 @@ function calculateScore() {
   return score;
 }
 
-// Submit button handler
+// Submit handler
 submitButton.addEventListener("click", function () {
   const score = calculateScore();
 
@@ -104,14 +103,14 @@ submitButton.addEventListener("click", function () {
   localStorage.setItem("score", score);
 });
 
-// Load score from localStorage on refresh
-function loadSavedScore() {
+// Load saved score after refresh
+function loadScore() {
   const savedScore = localStorage.getItem("score");
   if (savedScore !== null) {
     scoreElement.innerText = `Your score is ${savedScore} out of ${questions.length}.`;
   }
 }
 
-// Initial calls
+// Initial execution
 renderQuestions();
-loadSavedScore();
+loadScore();
